@@ -1,0 +1,48 @@
+
+[all:children]
+Splunk
+seconion
+PA
+
+[Splunk:children]
+Splunk_Manager
+Splunk_ES
+Splunk_Forward
+Splunk_Indexers
+Splunk_Forward2
+
+[seconion:children]
+SO_Manager
+Sensors
+
+[SO_Manager]
+SO_MGR
+
+[Splunk_Manager]
+CM1
+
+[Splunk_ES]
+SH1
+
+[Splunk_Forward]
+FWD
+
+[Splunk_Forward2]
+FWD2
+
+[PA]
+PaloAlto
+
+
+[Splunk_Indexers]
+{% for x in range(0,Nodes) %}
+{% set indexer = "IDX" %}
+{{ indexer }}{{x}}
+{% endfor %}
+
+
+[Sensors]
+{% for server_name in Sensor_Nodes %}
+{% set server_data = all_vars[server_name.key] %}
+{{ server_data.server.Name }}
+{% endfor %}

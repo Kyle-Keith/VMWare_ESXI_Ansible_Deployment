@@ -1,0 +1,69 @@
+---
+# req vars
+# ks
+- name: Include variables from group_vars/all.yml
+  include_vars:
+    file: group_vars/all.yml
+    name: all_vars
+
+- name: Create list of all servers
+  set_fact:
+    esxi_dicts: "{{ esxi_dicts|default([]) + [lookup('vars', item)] }}"
+  loop: "{{ Cluster_Servers.keys() }}"
+
+- name: Set fact if server_macs exists
+  set_fact:
+    server_macs_exists: "{{ 'server_macs' in all_vars }}"
+
+- name: Include tasks for CP entries
+  include_tasks: create_dirs.yml
+  with_nested:
+    - "{{ server_macs|dict2items }}"
+    - "{{ esxi_dicts }}"
+  loop_control:
+    loop_var: nested_item
+  when: server_macs_exists and  nested_item.0.key.startswith('CP')  
+
+- name: remove dhcp leases
+  file:
+    path: /var/lib/dhcp/dhcpd.leases
+    state: absent
+
+- name: remove pxelinux.cfg directory
+  file:
+    path: /var/lib/tftpboot/pxelinux.cfg
+    state: absent
+  ignore_errors: True
+
+- name: copy esxi boot files
+  copy:
+    src: "{{item}}"
+    dest: /var/lib/tftpboot/
+    owner: tftp
+    group: tftp
+    mode: 0777
+  loop:
+    - crypto64.efi
+    - mboot.efi
+    - pxelinux.0
+    - pxelinux.cfg
+    - snponly.efi
+    - undionly.kpxe
+    - menu.c32
+  become: true   
+
+- name: Create list of all servers
+  set_fact:
+    pxe_dicts: "{{ pxe_dicts|default([]) + [lookup('vars', item)] }}"
+  loop: "{{ Cluster_Servers.keys() }}"
+
+- name: Include install server
+  include_tasks: config_pxe.yml
+  loop: "{{ pxe_dicts }}"
+
+- name: kickstart cleanup
+  shell: | 
+    rm -rf /var/www/html/esxi_ks/*
+  become: true 
+
+...

@@ -1,0 +1,22 @@
+---
+
+- name: get server list
+  set_fact:
+    ip_dicts: "{{ ip_dicts|default([]) + [lookup('vars', item,wantlist=True)] }}"
+  with_items: "{{ Cluster_Servers.keys() }}"
+
+- name: set ip addresses
+  include_tasks: change_address.yml
+  with_together:
+        - ["{{Splunk_Manager.Name}}","{{Splunk_Search.Name}}", "{{Splunk_Forward.Name}}"]
+        - ["{{Splunk_Manager.IP}}","{{Splunk_Search.IP}}", "{{Splunk_Forward.IP2}}"]
+        - ["{{Splunk_Manager.Prefix}}","{{Splunk_Search.Prefix}}", "{{Splunk_Forward.Prefix}}"]
+        - ["{{Splunk_Manager.Gateway}}","{{Splunk_Search.Gateway}}", "{{Splunk_Forward.Gateway2}}"]
+
+- name: set ip addresses
+  include_tasks: change_address_indexers.yml
+  loop: "{{ip_dicts}}"
+  loop_control:
+    index_var: vm_index
+
+...

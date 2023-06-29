@@ -1,0 +1,19 @@
+---
+- name: Set fact for current centos_dict item
+  set_fact:
+    item: "{{ nested_item.1 }}"
+
+- name: Create directories for each MAC address
+  file:
+    path: "/var/www/html/esxi_ks/01-{{ nested_item.0.value | replace(':', '-') }}"
+    state: directory
+  when: nested_item.0.key == nested_item.1.Name
+
+- name: Template kickstart
+  become: true
+  template:
+    src: esxi_ks.cfg
+    dest: "/var/www/html/esxi_ks/01-{{ nested_item.0.value | replace(':', '-') }}/ks.cfg"
+  when: nested_item.0.key == nested_item.1.Name
+
+  ...

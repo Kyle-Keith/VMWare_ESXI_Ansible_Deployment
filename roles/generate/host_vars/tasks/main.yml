@@ -1,0 +1,12 @@
+---
+
+- name: generate hosts variables file
+  template:
+    src: "./{{item.0}}"
+    dest: "/ansible/{{item.1}}"
+    mode: 0755
+  with_together:
+    - ["esxi","seconion","Splunk","PA",localhost]
+    - ["group_vars/","group_vars/","group_vars/","group_vars/","host_vars/"]
+
+...

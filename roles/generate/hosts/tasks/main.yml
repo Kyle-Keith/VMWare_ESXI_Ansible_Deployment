@@ -1,0 +1,13 @@
+---
+- name: Include variables from group_vars/all.yml
+  include_vars:
+    file: group_vars/all.yml
+    name: all_vars
+
+
+- name: generate hosts file
+  template:
+    src: ./hosts
+    dest: '/ansible/'
+    mode: 0755
+  become: false

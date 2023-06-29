@@ -1,0 +1,9 @@
+# roles/pxe_boot_esxi/templates/000-default.conf.j2
+<VirtualHost *:80>
+        ServerAdmin cptadmin@{{TeamKitNum}}.mil
+        DocumentRoot /var/www/html
+        ServerName CyberArmory
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

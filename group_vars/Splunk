@@ -1,0 +1,8 @@
+---
+ansible_user: xadministrator
+ansible_ssh_user: xadministrator
+ansible_password: 'ChangeMe135!#%'
+ansible_become_user: root
+ansible_ssh_pass: 'ChangeMe135!#%'
+ansible_become_pass: 'ChangeMe135!#%'
+...

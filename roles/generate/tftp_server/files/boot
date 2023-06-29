@@ -1,0 +1,4 @@
+ipmi power bootoption 14
+vmwa dev2stop
+ipmi power reset
+vmwa status

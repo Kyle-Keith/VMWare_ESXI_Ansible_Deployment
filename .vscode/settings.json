@@ -1,0 +1,6 @@
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/deployphp/deployer/master/src/schema.json": "file:///f%3A/Ansible_Main/roles/seconion/deploy_ManagerSearch/tasks/deploy.yml"
+    },
+    "ansible.python.interpreterPath": "c:\\Users\\kylek\\AppData\\Local\\Programs\\Python\\Python310\\python.exe"
+}

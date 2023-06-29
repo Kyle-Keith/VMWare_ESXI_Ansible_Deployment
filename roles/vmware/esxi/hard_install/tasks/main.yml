@@ -1,0 +1,11 @@
+---
+    - name: Create list of dictionaries
+      set_fact:
+        server_dicts: "{{ server_dicts|default([]) + [lookup('vars', item)] }}"
+      loop: "{{ Cluster_Servers.keys() }}"
+
+    - name: Include install server task
+      include_tasks: install_server.yml
+      loop: "{{ server_dicts }}"
+... 
+

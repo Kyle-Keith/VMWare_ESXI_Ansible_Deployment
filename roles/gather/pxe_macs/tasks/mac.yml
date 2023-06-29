@@ -1,0 +1,22 @@
+- name: run get_pxenic_list
+  shell:
+    cmd: /ansible/get_pxenic_list.sh -i "{{item.IP}}" -u "{{IPMI_Username }}" -p '{{IPMI_Pass}}' | grep "LAN 1" | cut -d ":" -f 2-7
+  register: temp_mac
+  until: (temp_mac.stdout | length) > 4
+
+- name: change colons
+  debug:
+    msg: "{{ temp_mac.stdout | replace (':','-')}}"
+  register: first_mac
+
+# - name: set var
+#   set_fact:
+#     "{{item.Name}}": "{{ first_mac.msg }}"
+
+- name: Update macs dictionary
+  set_fact:
+    server_macs: "{{ server_macs | combine({item.Name: first_mac.msg}) }}"
+
+- name: show mac
+  debug:
+    msg: "{{ first_mac.msg }}"

@@ -1,0 +1,22 @@
+---
+# Main role tasks - vmware/vcenter/add_esxi_hosts
+
+- name: Add ESXi Host to vCenter 
+  vmware_host:
+    validate_certs: no
+    hostname: '{{ VCSA.IP}}'
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    datacenter_name: '{{ TeamKitNum }}'
+    cluster_name: "DMSS"
+    esxi_hostname: '{{  item.server.IP }}'
+    esxi_username: 'root'
+    esxi_password: '{{ DMSS_Pass }}'
+    state: present
+  register: result
+  until: result is not failed
+  retries: 15
+  delay: 10
+  delegate_to: localhost
+
+...

@@ -1,0 +1,7 @@
+---
+ansible_user: admin
+ansible_ssh_user: admin
+ansible_ssh_pass: 'ChangeMe135!#%'
+ansible_become_pass: 'ChangeMe135!#%'
+provider:
+  ip_address: "10.3.3.2"

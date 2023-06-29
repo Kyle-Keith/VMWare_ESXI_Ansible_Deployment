@@ -1,0 +1,98 @@
+#  vars to use in role:
+#    - hosts_to_scan: "30-32"
+#    - out_file: "{{ /ansible/group_vars/all.yml}}"
+#    - constant: "{{ Cyberpacs }}"
+#    - var_list: "Cluster_Servers" OR "Sensor_Nodes"
+---
+
+- name: check for ESXI servers IPMI
+  shell: 
+    cmd: "nmap -F {{octet}}.{{ hosts_to_scan }} | grep report | sort -u | wc -l"
+  delegate_to: localhost
+  register: scanned_hosts
+  become: true
+
+- name: hosts sanity check
+  fail:
+    msg: "cannot reach all ESXI hosts. Check network connection"
+  when: "scanned_hosts.stdout |int   !=  constant"
+
+- name: set num host variable
+  set_fact:
+    num_hosts: "{{scanned_hosts.stdout | int}}"
+
+- name: Retrieve list of server IPs
+  shell:
+    cmd: "nmap -F {{octet}}.{{ hosts_to_scan }} | grep report | sort -u | awk '{print $NF}'"
+  delegate_to: localhost
+  register: ip_list
+  become: true
+
+- name: Clean ip list
+  set_fact:
+    cleaned_ip_list: "{{ ip_list.stdout_lines | map('regex_replace', '\\(|\\)', '') | list }}"
+
+- name: Display the filtered deployment_Servers
+  debug:
+    var: cleaned_ip_list
+
+- block:
+  - name: Convert IP range to a list
+    set_fact:
+      ip_range_list: "{{ range(node_ip_range.split('-')[0]|int, node_ip_range.split('-')[1]|int + 1) | list }}"
+
+  - name: Create empty deployment dictionary
+    set_fact:
+      deployment_Servers: {}
+
+  - name: Update deployment dictionary with IP range
+    set_fact:
+      deployment_Servers: "{{ deployment_Servers | combine({ 'CP' ~ (idx +1) |string: octet + '.' + (ip_range_list[idx]|string if idx < ip_range_list|length else (idx + ip_range_list[0]|int)|string) }) }}"
+    loop: "{{ range(0, 3)|list }}"
+    loop_control:
+      loop_var: idx
+      
+  when: var_list == "Cluster_Servers"
+
+- block:
+  - name: Convert IP range to a list
+    set_fact:
+      ip_range_list: "{{ range(sensor_ip_range.split('-')[0]|int, sensor_ip_range.split('-')[1]|int + 1) | list }}"
+
+  - name: Create empty deployment dictionary
+    set_fact:
+      deployment_Servers: {}
+
+  - name: Update deployment dictionary with IP range
+    set_fact:
+      deployment_Servers: "{{ deployment_Servers | combine({ 'MR' ~ idx|string: octet + '.' + (ip_range_list[idx]|string if idx < ip_range_list|length else (idx + ip_range_list[0]|int)|string) }) }}"
+    loop: "{{ range(0, 6)|list }}"
+    loop_control:
+      loop_var: idx
+      
+  when: var_list == "Sensor_Nodes"
+  
+- debug:
+    var: deployment_Servers
+
+- name: Filter deployment_Servers based on input list
+  set_fact:
+    filtered_deployment_Servers: "{{ deployment_Servers | dict2items | selectattr('value', 'in', cleaned_ip_list) | items2dict }}"
+
+- name: create dynamic variable
+  set_fact:
+    "{{ var_list}}": "{{  deployment_Servers | dict2items | selectattr('value', 'in', cleaned_ip_list) }}"
+
+- name: Append filtered Cluster_Servers to file
+  blockinfile:
+    path: "{{ out_file }}"
+    block: |
+      {{var_list}}:
+      {% for key, value in filtered_deployment_Servers.items() %}
+        {{ key }}: {{ value }}
+      {% endfor %}
+    insertbefore: "..."
+    marker: "# Discovered {{var_list}}"
+    state: present
+
+...

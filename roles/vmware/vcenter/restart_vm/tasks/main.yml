@@ -1,0 +1,12 @@
+---
+- name: turn on host
+  vmware_guest_powerstate:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+      #datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    name: "{{ vm_name }}"
+    state: restarted
+  delegate_to: localhost
+

@@ -1,0 +1,19 @@
+---
+# Main role tasks - vmware/vcenter/create_cluster
+
+- name: Create Cluster in vCenter
+  vars:
+    ansible_python_interpreter: "{{ playbook_dir }}/virtualenv/.venv/bin/python3.6"
+  community.vmware.vmware_cluster:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    cluster_name: '{{VCSA.datacenter_name}}'
+  delegate_to: localhost
+  register: cluster_result
+  retries: 3
+  delay: 10 
+  until: cluster_result is not failed 
+  ignore_errors: true

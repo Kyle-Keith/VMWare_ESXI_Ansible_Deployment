@@ -1,0 +1,12 @@
+---
+ansible_user: xadministrator
+ansible_become: yes
+ansible_become_method: sudo
+ansible_password: 'M@rines1M@rines1'
+ansible_ssh_pass: 'M@rines1M@rines1'
+ansible_become_password: 'M@rines1M@rines1'
+ansible_become_pass: 'M@rines1M@rines1'
+
+
+
+...

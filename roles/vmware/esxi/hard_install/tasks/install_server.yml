@@ -1,0 +1,94 @@
+---
+## /opt/baremetal is the staging directory.
+- name: Mounting source directory from official production ESXi ISO . . . copying over build files . . . backing up defaults . . .
+  shell: |
+    mkdir /mnt/{{ item.Name }}
+    mount -o loop -t iso9660 /ansible/files/isos/{{ src_iso_file }} /mnt/{{ item.Name }}/
+    mkdir -p /opt/baremetal/{{ item.Name }}
+    mkdir -p /opt/baremetal/temp/{{ item.Name }}
+    mkdir -p /opt/baremetal/temp/{{ item.Name }}/etc/vmware/weasel
+    cp -r /mnt/{{ item.Name }}/* /opt/baremetal/{{ item.Name }}/
+    umount /mnt/{{ item.Name }}
+  become: true
+
+## The following two tasks will make the custom iso bootable by both legacy and UEFI implementations:    
+- name: Copying custom boot.cfg to root directory . . .
+  copy:
+    src: /ansible/files/{{ esxi_build }}/boot.cfg
+    dest: /opt/baremetal/{{ item.Name }}
+    owner: root
+    group: root
+    mode: '0744'
+  become: true
+
+
+- name: Copying custom UEFI boot.cfg to root efi directory . . .
+  copy:
+    src: /ansible/files/{{ esxi_build }}/efi/boot/boot.cfg
+    dest: /opt/baremetal/{{ item.Name }}/efi/boot
+    owner: root
+    group: root
+    mode: '0744'
+  become: true
+
+
+- name: copy  kickstart
+  template:
+    src: "./esxi_ks.cfg"
+    dest: "/opt/baremetal/{{ item.Name }}/KS.CFG"
+  become: true
+
+- name: Creating bootable iso from all files . . .
+  shell: >
+    mkisofs
+    -relaxed-filenames
+    -J
+    -R
+    -b isolinux.bin
+    -c boot.cat
+    -no-emul-boot
+    -boot-load-size 4
+    -boot-info-table
+    -eltorito-alt-boot
+    -e efiboot.img
+    -boot-load-size 1
+    -no-emul-boot
+    -o /ansible/files/esxi/{{ item.Name }}.iso
+    /opt/baremetal/{{ item.Name }}/
+  become: true
+
+- name: remove directories
+  shell: |
+    rm -rf /opt/baremetal
+    rm -rf /mnt/{{item.Name}}
+  become: true
+
+- name: template smc
+  template:
+    src: ./smc
+    dest: /ansible/files/smc
+
+- name: mount esxi images
+  shell: |
+    "cat smc | sudo /ansible/SMCIPMITool/SMCIPMITool {{ item.IP }} {{ IPMI_Username }} {{ IPMI_Pass }} shell"
+  delegate_to: localhost
+
+- name: Pause for two minutes while ESXi hosts are rebooted after firstboot
+  pause:
+    seconds: 120
+
+- name: Wait for ESXi to come back online after reboot
+  uri:
+    url: "https://{{ item.server.IP }}"
+    validate_certs: no
+    timeout: 500
+  register: url_check
+  until: url_check.status == 200
+  retries: 80
+  delay: 10
+
+- name: remove iso
+  shell: |
+    rm /ansible/files/esxi/{{item.Name}}.iso
+  become: true
+...

@@ -1,0 +1,64 @@
+#
+#
+#
+#
+---
+- name: Configure TFTP
+  template:
+    src: tftpd-hpa.j2
+    dest: /etc/default/tftpd-hpa
+    owner: root
+    group: root
+  become: true
+
+- name: copy esxi boot files
+  copy:
+    src: "{{item}}"
+    dest: /var/lib/tftpboot/
+    owner: tftp
+    group: tftp
+    mode: 0777
+  loop:
+    - esxi/crypto64.efi
+    - esxi/mboot.efi
+    - esxi/pxelinux.0
+    - esxi/pxelinux.cfg
+    - esxi/snponly.efi
+    - esxi/undionly.kpxe
+  become: true   
+
+- name: template esxi boot files
+  template:
+    src: boot.cfg
+    dest: /var/lib/tftpboot/{{item}}
+    owner: tftp
+    group: tftp
+    mode: 0777
+  loop:
+    - "boot.cfg"
+    - "/ESXI_7U3/boot.cfg"
+    - "/ESXI_7U3/efi/boot/boot.cfg"
+
+- name: chown all files in tftp
+  shell: |
+    sudo chown -R tftp:tftp /var/lib/tftpboot
+  become: true
+
+- name: copy over boot file
+  copy:
+    src: ./boot
+    dest: /ansible/files
+    owner: cptadmin
+    group: cptadmin
+
+- name: Ensure tftp hpa server is restarted
+  service:
+    name: tftpd-hpa.service
+    state: restarted
+  become: true
+
+
+    
+
+
+...

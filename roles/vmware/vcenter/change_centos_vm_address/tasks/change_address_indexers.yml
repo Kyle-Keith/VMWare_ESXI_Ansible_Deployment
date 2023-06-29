@@ -1,0 +1,76 @@
+
+---
+- name: set ip
+  vmware_vm_shell:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    vm_id: "{{ Splunk_Indexer.Name}}{{vm_index}}"
+    vm_username: root
+    vm_password: "{{ova_pass}}"
+    vm_shell: "/bin/nmcli"
+    vm_shell_args: "con mod ens192 ipv4.address {{ Splunk_Indexer.IP}}{{ vm_index|int + 5}}/{{Splunk_Indexer.Prefix}}"
+  delegate_to: localhost
+  register: command_output
+
+- name: set gateway
+  vmware_vm_shell:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    vm_id: "{{ Splunk_Indexer.Name}}{{vm_index}}"
+    vm_username: root
+    vm_password: "{{ova_pass}}"
+    vm_shell: "/bin/nmcli"
+    vm_shell_args: "con mod ens192 ipv4.gateway {{Splunk_Indexer.Gateway}}"
+  delegate_to: localhost
+
+
+- name: set dns
+  vmware_vm_shell:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    vm_id: "{{ Splunk_Indexer.Name}}{{vm_index}}"
+    vm_username: root
+    vm_password: "{{ova_pass}}"
+    vm_shell: "/bin/nmcli"
+    vm_shell_args: "con mod ens192 ipv4.dns '{{DC1.IP}}'"
+  delegate_to: localhost
+
+- name: set to static
+  vmware_vm_shell:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    vm_id: "{{ Splunk_Indexer.Name}}{{vm_index}}"
+    vm_username: root
+    vm_password: "{{ova_pass}}"
+    vm_shell: "/bin/nmcli"
+    vm_shell_args: "con mod ens192 ipv4.method manual"
+  delegate_to: localhost
+
+
+- name: turn on interface
+  vmware_vm_shell:
+    hostname: '{{VCSA.IP}}'
+    username: '{{VCSA.Username}}'
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no
+    vm_id: "{{ Splunk_Indexer.Name}}{{vm_index}}"
+    vm_username: root
+    vm_password: "{{ova_pass}}"
+    vm_shell: "/bin/nmcli"
+    vm_shell_args: "con up ens192"
+  delegate_to: localhost
+
+...

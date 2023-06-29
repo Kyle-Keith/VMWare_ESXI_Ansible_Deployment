@@ -1,0 +1,42 @@
+
+
+---
+# vars
+# kickstart_dir
+# ks
+
+- name: Configure DHCP
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+
+- name: Ensure ISC DHCP server is restarted
+  become: true
+  service:
+    name: isc-dhcp-server
+    state: restarted
+
+- name: copy kickstart
+  become: true
+  template:
+    src: "./{{ ks }}"
+    dest: "/var/www/html/esxi_ks/ks.cfg"
+
+- name: restart server with pxe boot option
+  shell: "cat /ansible/files/boot | sudo /ansible/SMCIPMITool/SMCIPMITool {{ item.IP }} {{IPMI_Username}} {{ IPMI_Pass }} shell"
+  
+- name: Pause for two minutes while ESXi hosts are rebooted after firstboot
+  pause:
+    seconds: 120
+
+- name: Wait for ESXi to come back online after reboot
+  uri:
+    url: "https://{{ item.server.IP }}"
+    validate_certs: no
+    timeout: 500
+  register: url_check
+  until: url_check.status == 200
+  retries: 80
+  delay: 10
+
+

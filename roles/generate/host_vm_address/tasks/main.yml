@@ -1,0 +1,18 @@
+# vars:
+#file_source: ./network-gateway.yaml or ./network-eight.yaml
+---
+- name: copy ip addr
+  template: 
+    src: "./{{file_source}}"
+    dest: /etc/netplan/01-network-manager-all.yaml
+    owner: root
+    group: root
+  become: true
+
+- name: apply ip addr as gateway
+  shell: |
+    sudo netplan apply
+    rm -rf /home/cptadmin/.ssh/*
+  become: true
+
+...

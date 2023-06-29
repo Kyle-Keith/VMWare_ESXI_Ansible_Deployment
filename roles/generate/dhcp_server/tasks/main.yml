@@ -1,0 +1,33 @@
+---
+
+- name: Include group_vars/all.yml
+  include_vars:
+    file: group_vars/all.yml
+    name: all_vars
+
+- name: Set fact if server_macs exists
+  set_fact:
+    server_macs_exists: "{{ 'server_macs' in all_vars }}"
+
+- name: Configure DHCP
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+  when: server_macs_exists
+
+
+- name: Configure DHCP
+  template:
+    src: isc-dhcp-server.j2
+    dest: /etc/default/isc-dhcp-server
+
+
+- name: Ensure ISC DHCP server is restarted
+  become: true
+  service:
+    name: isc-dhcp-server
+    state: restarted
+  when: server_macs_exists
+
+
+...

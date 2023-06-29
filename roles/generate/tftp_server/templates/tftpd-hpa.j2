@@ -1,0 +1,5 @@
+# roles/pxe_boot_esxi/templates/tftpd-hpa.j2
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/var/lib/tftpboot"
+TFTP_ADDRESS="{{octet}}.1:69"
+TFTP_OPTIONS="--secure"

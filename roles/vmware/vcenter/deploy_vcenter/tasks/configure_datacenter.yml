@@ -1,0 +1,47 @@
+---
+- name: Provide information about vCenter
+  vmware_about_info:
+    hostname: '{{VCSA.IP}}'
+    validate_certs: no
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+  delegate_to: localhost
+  register: vcenter_about_info   
+
+- name: Create Datacenter
+  vmware_datacenter:
+    validate_certs: no
+    hostname: '{{VCSA.IP}}'
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    datacenter_name: '{{ TeamKitNum }}'
+    state: present
+  delegate_to: localhost
+
+- name: Create Cluster DMSS
+  vmware_cluster:
+    validate_certs: no
+    hostname: '{{ VCSA.IP }}'
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    datacenter: '{{ VCSA.datacenter_name }}'
+    cluster_name: "DMSS"
+  register: cl_result
+  delegate_to: localhost
+
+- name: Create VM Folder - VMS
+  vcenter_folder:
+    validate_certs: no
+    hostname: '{{VCSA.IP}}'
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    datacenter_name: '{{ VCSA.datacenter_name }}'
+    folder_name: '{{ VCSA.vm_folder }}'
+    folder_type: vm
+    state: present
+  register: vm_folder_creation_result
+  delegate_to: localhost
+
+
+
+...

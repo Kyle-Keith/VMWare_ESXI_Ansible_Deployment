@@ -1,0 +1,12 @@
+---
+- name: Create list of dictionaries
+  set_fact:
+    esxi_dicts: "{{ esxi_dicts|default([]) + [lookup('vars', item)] }}"
+  loop: "{{ Cluster_Servers.keys() }}"
+
+- name: Deploy Splunk VMs
+  include_tasks: add_hosts.yml
+  with_items: "{{ cluster_servers }}"
+  loop: "{{ esxi_dicts }}"
+  
+... 

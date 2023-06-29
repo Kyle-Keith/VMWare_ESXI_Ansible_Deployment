@@ -1,0 +1,32 @@
+---
+
+
+- name: change vswitch settings
+  vmware_vswitch:
+    hostname: '{{VCSA.IP}}'
+    validate_certs: no
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    esxi_hostname: "{{item.server.IP }}"
+    switch_name: "Ether_Channel"
+    nic_name:
+      - vmnic2
+      - vmnic3
+      - vmnic4
+      - vmnic5
+    teaming:
+      active_adapters:
+        - vmnic2
+        - vmnic3
+        - vmnic4
+      standby_adapters:
+        - vmnic5
+      load_balancing: loadbalance_ip
+      network_failure_detection: link_status_only
+  register: result
+  until: result is not failed
+  retries: 5
+  delay: 10
+  delegate_to: localhost
+
+...

@@ -1,0 +1,52 @@
+#Local Machine Username
+localhost_username: admin
+
+#Local Machine Password
+localhost_password: password
+
+#username for IPMI interface
+IPMI_Username: admin
+
+#What is the IPMI Password?
+IPMI_Pass: password
+
+#What is the password going to be for this DMSS Kit?
+DMSS_Pass: password
+
+#What are the first 3 octets?(10.1.0) 
+octet: "192.168.86"
+
+#Enter your domain
+domain: test
+
+#number of Servers; max is 3
+Nodes: 3
+
+#number of Sensors; max is 6
+Sensors: 6
+
+#Enter VMware Enterprise License plus for ESXI servers (add a license for each Node)
+license:
+  - xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+  - xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+  - xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+  - xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+
+ #What is the License for vSphere 7? 
+vcenter_license: xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+
+
+##############################################################################################
+#Constant Variables: edit with caution
+#General vars#################################################################################
+
+
+#vmware vars#####################################
+src_iso_file: "VMware-VMvisor-Installer-7.0U3g-20328353.x86_64.iso"
+esxi_build: "20328353"
+vcsa_user: administrator
+vcsa_ova: 'VMware-vCenter-Server-Appliance-7.0.3.01300-21290409_OVF10.ova'
+
+#System Settings#################################
+Max_Nodes: 3 #any change to a value greater than 3 will require adjustments to the roles/generate/varaibles/templates/secrets.yml file
+node_ip_range: "30-32" #this is only the scan range, it does not reflect the node ips in the /ansible/group_vars/all.yml file

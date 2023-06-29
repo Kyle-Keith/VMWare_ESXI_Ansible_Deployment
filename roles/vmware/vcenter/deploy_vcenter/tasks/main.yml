@@ -1,0 +1,36 @@
+---
+# Main role tasks - vmware/vcenter/deploy_vcenter
+
+- name: get second server
+  set_fact:
+    vcsa_dicts: "{{ vcsa_dicts|default([]) + [lookup('vars', item,wantlist=True)] }}"
+  with_items: "{{ Cluster_Servers.keys() }}"
+  when:  Cluster_Servers | length > 2
+
+- name: get first server
+  set_fact:
+    vcsa_dicts: "{{ vcsa_dicts|default([]) + [lookup('vars', item,wantlist=True)] }}"
+  with_items: "{{ Cluster_Servers.keys() | first }}"
+  when: Cluster_Servers | length < Max_Nodes
+
+- name: Deploy vCenter
+  include_tasks: deploy_vcenter.yml
+  loop: "{{vcsa_dicts[1] }}"
+  when:  Cluster_Servers | length > 2
+
+- name: Deploy vCenter
+  include_tasks: deploy_vcenter.yml
+  loop: "{{vcsa_dicts[0] }}"
+  when:  Cluster_Servers | length < Max_Nodes
+
+- name: get server vars
+  set_fact:
+    server_dicts: "{{ server_dicts|default([]) + [lookup('vars', item,wantlist=True)] }}"
+  with_items: "{{ Cluster_Servers.keys() }}"
+
+- name: Create default datacenter
+  include_tasks: configure_datacenter.yml
+  loop: "{{server_dicts }}"
+
+
+...

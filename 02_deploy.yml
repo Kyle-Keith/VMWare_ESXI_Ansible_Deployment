@@ -1,0 +1,31 @@
+---
+- name: generate variables for deployment
+  hosts: localhost
+  gather_facts: true
+  connection: local
+  become: true
+  vars:
+    - file_source: "network-gateway.yaml"
+  vars_files: 
+    - ./deployment_vars.yml
+    - /ansible/deployment_vars.yml
+  roles:
+    - generate/host_vm_address #Required for deployment DO NOT REMOVE
+    - generate/tftp_server #Required for deployment DO NOT REMOVE
+    - generate/dhcp_server #Required for deployment DO NOT REMOVE
+    - generate/network_configs #Required for deployment DO NOT REMOVE
+
+- name: install system and virtual machines
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: yes
+  vars_files: 
+    - /ansible/group_vars/all.yml
+    - /ansible/deployment_vars.yml
+  roles: 
+    - vmware/esxi/hard_install   #Required for deployment DO NOT REMOVE
+    - vmware/vcenter/deploy_vcenter  #Required for deployment DO NOT REMOVE
+    - vmware/vcenter/add_esxi_hosts #Required for deployment DO NOT REMOVE
+    - vmware/vcenter/configure_vswitch #Required for deployment DO NOT REMOVE
+    - vmware/vcenter/change_centos_vm_address #Splunk

@@ -1,0 +1,42 @@
+---
+- name: generate variables for deployment
+  hosts: localhost
+  gather_facts: true
+  connection: local
+  vars_files: ./deployment_vars.yml
+  vars:
+    - CP1: "CP1"
+    - CP2: "CP2"
+    - CP3: "CP3"
+    - file_source: ./network-gateway.yaml
+  roles:
+    - generate/host_vars #Required for deployment DO NOT REMOVE
+    - generate/variables
+    - generate/host_vm_address
+    - generate/hosts_resolution
+    - generate/pxe_iso_files
+
+- name: generate variables for deployment
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars_files: 
+    - ./deployment_vars.yml
+  vars:
+    - hosts_to_scan: "{{node_ip_range}}" #IPMI Addresses for Servers
+    - var_list: "Cluster_Servers"
+    - constant: "{{ Nodes }}"
+    - out_file: "/ansible/group_vars/all.yml"
+    - prepend: "CP"
+  roles:
+    - gather/server_list
+    
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  vars_files: 
+    - ./deployment_vars.yml
+  roles:
+    - generate/hosts
+
+...

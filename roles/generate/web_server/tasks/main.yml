@@ -1,0 +1,14 @@
+
+---
+- name: Configure Apache2
+  template:
+    src: 000-default.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+
+- name: Ensure apache2 server is restarted
+  become: true
+  service:
+    name: apache2
+    state: restarted
+
+...

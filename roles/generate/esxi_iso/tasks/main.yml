@@ -1,0 +1,24 @@
+---   
+- name: include all.yml
+  include_vars: /ansible/group_vars/all.yml
+
+- name: create /opt/barmetal if doesn't exists then rm so configs
+  shell: |
+    sudo mkdir -p /opt/baremetal/
+    sudo rm -rf /opt/baremetal/*
+  become: True
+
+- name: create ESXI ISOs
+  block:
+    - name: create multiple ESXI ISOs
+      include_tasks: ./esxigen.yml
+      vars:
+        current_server: "{{ item }}"
+      loop: "{{ Cluster_Servers.keys() | list }}"
+
+- name: chown isos
+  shell: |
+    sudo chown -R cptadmin:cptadmin /ansible
+  become: True
+
+...

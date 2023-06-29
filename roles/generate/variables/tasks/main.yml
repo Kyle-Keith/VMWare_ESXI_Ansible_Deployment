@@ -1,0 +1,25 @@
+---
+- set_fact:
+    passkey: "{{ lookup('password', '/dev/null length=12 chars=ascii_letters') }}"  
+
+- set_fact:
+    indexpasskey: "{{ lookup('password', '/dev/null length=12 chars=ascii_letters') }}"  
+
+- name: generate encrypted kit pass
+  shell:
+    openssl passwd -1 stdin "{{ DMSS_Pass }}"
+  register: encryptPass
+
+- set_fact:
+    encryptedPass: "{{ encryptPass.stdout}}"
+
+- name: generate secrets file
+  template:
+    src: ./secrets.yaml
+    dest: '/ansible/group_vars/all.yml'
+    mode: 0755
+  become: false
+
+
+
+...

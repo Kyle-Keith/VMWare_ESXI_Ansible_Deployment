@@ -1,0 +1,12 @@
+---
+- name: Add a new vCenter license - vCenter
+  vcenter_license:
+    validate_certs: no
+    hostname: '{{ VCSA.IP }}'
+    username: '{{ VCSA.Username }}'
+    password: '{{ DMSS_Pass }}'
+    license: '{{ VCSA.License }}'
+    state: present
+  delegate_to: localhost
+  retries: 15
+  delay: 10

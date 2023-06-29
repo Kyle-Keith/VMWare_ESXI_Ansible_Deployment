@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Armory User Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin-top: 30px;
+    }
+    ul,
+    ol {
+        margin-left: 20px;
+    }
+</style>
+</head>
+<body>
+    <h1>Cyber Armory User Guide</h1>
+    <h2>Links:</h2>
+<ul>
+    <li><a href="walkthrough/walkthrough.html">Bios Configuration Guide</a></li>
+    <li><a href="repo">Repository</a></li>
+    <li><a href="Documentation">Documentation</a></li>
+</ul>
+    <p>The Cyber armory will deploy a DMSS kit to the current baseline.
+        This baseline currently includes:</p>
+    <ul>
+        <li>Stacked Cisco Switches</li>
+        <li>Cisco ASA</li>
+        <li>Palo Alto</li>
+        <li>ESXI</li>
+        <li>VCSA</li>
+        <li>Splunk Distributed ( Manager, Search, Indexers, Deployment Server)</li>
+        <li>Security Onion (Manager/search)</li>
+        <li>SO Sensors</li>
+    </ul>
+    
+    <h2>Requirements:</h2>
+    <ul>
+        <li>The two Cisco switches from DMSS 3.0 must be stacked.</li>
+        <li>Internet connectivity with the IPMI interfaces on all servers, switches and the ASA.</li>
+        <li>SECURE BOOT MUST BE DISABLED UNTIL AFTER THE INSTALLATION IS FINISHED</li>
+        <li>PXE interfaces will need to be configured on each of the </li>
+        <li>Cyberarmory virtual machine must be bridged to the host computers NIC</li>
+        <li>Licenses for all VMWare servers will be needed for the deployment.</li>
+        <li>CyberArmory MUST be plugged into a port that has access to vlan2. Port 1/0/21 is specified in the Switch Configuration file.</li>
+        <li>IPMI IP addresses must match the last octet of the Example IP Scheme below.</li>
+        <li>IPMI Must have a user named ansible</li>
+    </ul>
+    
+    <h2>Deployment notes:</h2>
+    <ul>
+        <li>Passwords will be generated for the entire kit.</li>
+        <li>It is expected that the network configurations will be placed before the deployment of the DMSS.</li>
+        <li>Generated network files can be found in the /ansible/files/network folder after pre-deploy.sh has been completed.</li>
+        <li>Splunk licensing will be done post DMSS installation.</li>
+        <li>ESXI and VCenter Licenses MUST BE THE ENTERPRISE PLUS LICENSES! Licenses can be accessed through sharepoint.</li>
+        <li>It is recommended to use the provided network configurations during the deployment</li>
+        <li>PA utilizes DHCP pool reservations to it's mac address.</li>
+        <li>PA will utilize the ova_pass variable to set it's password and will need to be changed after the deployment.</li>
+        <li>The laptop that hosts the CyberArmory must have the ip address of .7 and a default gateway of .1. This VM will alter between .1 and .8 during the deployment.</li>
+        <li>Security Onion VM can only be installed on the same device that Vcenter is located.</li>
+        <li>Rerun Pre-deploy for each deployment</li>
+
+    </ul>
+    <h2>Post Deployment Notes:</h2>
+<ul>
+    <li>Remove "All ACCESS" Security Policy in Palo Alto</li>
+    <li>Disable ssh for ESXI hosts</li>
+    <li>Splunk FWD needs to be configured to your preference</li>
+    <li>Splunk needs to be licensed</li>
+    <li>Splunk CM1/SH1 will need to be set to distrubted mode inside the monitoring console</li>
+</ul>
+
+<h2>Deployment Operation:</h2>
+<ol>
+    <li>Cd to /ansible directory</li>
+    <li>Run the ansible-playbook 01_pre_stage.yml to prepare the server to deploy the DMSS kit.</li>
+    <li>Run 02_deploy.yml to deploy the actual DMSS.</li>
+    <li>Run 03_sensors.yml to deploy the SecurityOnion Sensors</li>
+</ol>
+
+<h2>Splunk:</h2>
+<ul>
+    <li>To adjust the default apps that will be deployed on the indexer add apps to the "/ansible/files/splunk/app" folders.</li>
+    <li>Extract the app into the directory and the cyberarmory will install it for you.</li>
+    <li>Splunk will need to be license post installation. This will no affect the installation. Restart via the commandline.</li>
+    <li>Splunk Enterprise security will need to be placed into the /ansible/files/splunk/apps/Search folder it has been extracted as an app and not an SPL file.</li>
+    <li>Splunk Index file currently looks like this:<a href="walkthrough/indexes.conf.j2">Index Configuration File</a></li>
+    <li>Splunk inputs.conf for SecurityOnion looks like this:<a href="walkthrough/inputs.conf.j2">SecurityOnion Inputs.conf</a></li>
+</ul>
+
+<h2>SecurityOnion:</h2>
+<p>Security Onion will install as a Manager/Search vm and hard install all 6 sensors as Sensors.
+    Splunk Universal Forwarders will already be deployed onto the sensors and be forwarding data to the Splunk Indexers.</p>
+
+
+
+<h2>Software Reference:</h2>
+
+<ul>Ansible:
+ <li>Splunk Version 9.0.0</li>
+ <li>SecurityOnion 2.3.140</li>
+ <li>Community.paloaltonetworks.panos</li>
+ <li>Community.vmware-2.7.0</li>
+ <li>Community.cisco.asa</li>
+ <li>Community.cisco.ios</li>
+  <li></li>
+  <li>Python Packages:</li>
+  <li>Package                Version</li>
+  <li>---------------------- -------------</li>
+ <li>ansible                2.10.0a8</li>
+ <li>ansible-base           2.10.17</li>
+ <li>apache-libcloud        3.2.0</li>
+ <li>apturl                 0.5.2</li>
+ <li>argcomplete            1.8.1</li>
+ <li>attrs                  21.2.0</li>
+ <li>Babel                  2.8.0</li>
+ <li>bcrypt                 3.2.0</li>
+ <li>blinker                1.4</li>
+ <li>Brlapi                 0.8.3</li>
+ <li>certifi                2020.6.20</li>
+ <li>chardet                4.0.0</li>
+ <li>click                  8.0.3</li>
+ <li>colorama               0.4.4</li>
+ <li>command-not-found      0.3</li>
+ <li>cryptography           3.4.8</li>
+ <li>cupshelpers            1.0</li>
+ <li>dbus-python            1.2.18</li>
+ <li>defer                  1.0.6</li>
+ <li>distro                 1.7.0</li>
+ <li>distro-info            1.1build1</li>
+ <li>dnspython              2.1.0</li>
+ <li>docker                 5.0.3</li>
+ <li>docker-compose         1.29.2</li>
+ <li>dockerpty              0.4.1</li>
+ <li>docopt                 0.6.2</li>
+ <li>duplicity              0.8.21</li>
+ <li>fasteners              0.14.1</li>
+ <li>future                 0.18.2</li>
+ <li>httplib2               0.20.2</li>
+ <li>idna                   3.3</li>
+ <li>importlib-metadata     4.6.4</li>
+ <li>jeepney                0.7.1</li>
+ <li>Jinja2                 3.0.3</li>
+ <li>jmespath               0.10.0</li>
+ <li>jsonschema             3.2.0</li>
+ <li>keyring                23.5.0</li>
+ <li>language-selector      0.1</li>
+ <li>launchpadlib           1.10.16</li>
+ <li>lazr.restfulclient     0.14.4</li>
+ <li>lazr.uri               1.0.6</li>
+ <li>lockfile               0.12.2</li>
+ <li>louis                  3.20.0</li>
+ <li>macaroonbakery         1.3.1</li>
+ <li>Mako                   1.1.3</li>
+ <li>MarkupSafe             2.0.1</li>
+ <li>monotonic              1.6</li>
+ <li>more-itertools         8.10.0</li>
+ <li>netaddr                0.8.0</li>
+ <li>netifaces              0.11.0</li>
+ <li>nftables               0.1</li>
+ <li>ntlm-auth              1.4.0</li>
+ <li>oauthlib               3.2.0</li>
+ <li>olefile                0.46</li>
+ <li>packaging              21.3</li>
+ <li>paramiko               2.9.3</li>
+ <li>pexpect                4.8.0</li>
+ <li>Pillow                 9.0.1</li>
+ <li>pip                    22.0.2</li>
+ <li>protobuf               3.12.4</li>
+ <li>ptyprocess             0.7.0</li>
+ <li>pycairo                1.20.1</li>
+ <li>pycryptodomex          3.11.0</li>
+ <li>pycups                 2.0.1</li>
+ <li>PyGObject              3.42.1</li>
+ <li>PyJWT                  2.3.0</li>
+ <li>pykerberos             1.1.14</li>
+ <li>pymacaroons            0.13.0</li>
+ <li>PyNaCl                 1.5.0</li>
+ <li>pyparsing              2.4.7</li>
+ <li>pyRFC3339              1.1</li>
+ <li>pyrsistent             0.18.1</li>
+ <li>python-apt             2.3.0+ubuntu2.1</li>
+ <li>python-dateutil        2.8.1</li>
+ <li>python-debian          0.1.43ubuntu1</li>
+ <li>python-dotenv          0.19.2</li>
+ <li>pytz                   2022.1</li>
+ <li>pyvmomi                7.0.3</li>
+ <li>pywinrm                0.3.0</li>
+ <li>pyxdg                  0.27</li>
+ <li>PyYAML                 5.4.1</li>
+ <li>reportlab              3.6.8</li>
+ <li>requests               2.28.0</li>
+ <li>requests-kerberos      0.12.0</li>
+ <li>requests-ntlm          1.1.0</li>
+ <li>requests-toolbelt      0.9.1</li>
+ <li>SecretStorage          3.3.1</li>
+ <li>selinux                3.3</li>
+ <li>setuptools             59.6.0</li>
+ <li>simplejson             3.17.6</li>
+ <li>six                    1.16.0</li>
+ <li>ssh-import-id          5.11</li>
+ <li>systemd-python         234</li>
+ <li>texttable              1.6.4</li>
+ <li>ubuntu-advantage-tools 27.11.2</li>
+ <li>ubuntu-drivers-common  0.0.0</li>
+ <li>ufw                    0.36.1</li>
+ <li>unattended-upgrades    0.1</li>
+ <li>urllib3                1.26.5</li>
+ <li>usb-creator            0.3.7</li>
+ <li>wadllib                1.3.6</li>
+ <li>websocket-client       1.2.3</li>
+ <li>wheel                  0.37.1</li>
+ <li>xdg                    5</li>
+ <li>xkit                   0.0.0</li>
+ <li>xmltodict              0.12.0</li>
+ <li>zipp                   1.0.0</li>
+</ul></li>
+ 
+ 
+</body>
+</html>
+ 

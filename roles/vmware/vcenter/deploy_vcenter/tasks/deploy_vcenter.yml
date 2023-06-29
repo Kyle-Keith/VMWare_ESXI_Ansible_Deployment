@@ -1,0 +1,51 @@
+---
+# Deploy vCenter - vmware/vcenter/deploy_vcenter
+
+- vmware_deploy_ovf:
+    hostname: "{{ item.server.IP }}"
+    username: "root"
+    password: "{{ DMSS_Pass }}"
+    name: "{{ VCSA.Name }}" # Virtual Machine name in ESXI, not FQDN
+    ovf: "/ansible/files/vcenter/{{ VCSA.ova_file }}"
+    validate_certs: false
+    wait_for_ip_address: true
+    inject_ovf_env: true
+    datastore: "{{ item.datastore }}"
+    networks: "{'Network 1':'Management'}"
+    power_on: yes
+    properties:
+      DeploymentOption.value: "{{ VCSA.size }}" # vCenter t-shirt size: tiny,small,medium,large, or infrastructure
+      guestinfo.cis.appliance.net.addr.family: "ipv4" # ipv4 or ipv6
+      guestinfo.cis.appliance.net.mode: "static" # static or dhcp
+      guestinfo.cis.appliance.net.addr: "{{ VCSA.IP }}"
+      guestinfo.cis.appliance.net.pnid: "{{VCSA.IP}}" # FQDN of vcenter server
+      guestinfo.cis.appliance.net.prefix: "{{ VCSA.Prefix }}" # netmask length, CIDR notation, i.e. '24'
+      guestinfo.cis.appliance.net.gateway: "{{ VCSA.Gateway }}"
+        #guestinfo.cis.appliance.net.dns.servers: "{{ DC1.IP }}" # Comma separated list of IP addresses of DNS servers.
+      guestinfo.cis.appliance.root.passwd: "{{ DMSS_Pass }}"
+      guestinfo.cis.ceip_enabled: "False"
+      guestinfo.cis.deployment.autoconfig: "True" # Auto-configure after deployment
+      guestinfo.cis.vmdir.domain-name: "{{ VCSA.domain }}"
+      guestinfo.cis.vmdir.username: "{{ VCSA.Username }}"
+      guestinfo.cis.vmdir.password: "{{ DMSS_Pass }}" # SSO Password for administrator@vsphere.local
+        #          guestinfo.cis.appliance.ntp.servers: "10.1.1.2"
+      guestinfo.cis.appliance.ssh.enabled: "True"
+      domain: "{{ VCSA.domain }}"
+      searchpath: "{{ VCSA.searchpath }}"
+  delegate_to: localhost
+  retries: 5
+  delay: 60
+
+- name: Wait for vCenter
+  community.vmware.vmware_about_info:
+    hostname: "{{ VCSA.IP }}"
+    username: "{{ VCSA.Username }}"
+    password: "{{ DMSS_Pass }}"
+    validate_certs: no
+  delegate_to: localhost
+  retries: 40
+  delay: 60
+  register: result
+  until: result is succeeded
+
+...

@@ -1,0 +1,16 @@
+---
+- name: Create list of dictionaries
+  set_fact:
+    switch_dicts: "{{ switch_dicts|default([]) + [lookup('vars', item)] }}"
+  loop: "{{ Cluster_Servers.keys() }}"
+
+- name: Include install server task
+  include_tasks: configure_vswitch.yml
+  loop: "{{ switch_dicts }}"
+
+- name: pause for 2 minutes
+  pause:
+    minutes: 2
+  
+... 
+

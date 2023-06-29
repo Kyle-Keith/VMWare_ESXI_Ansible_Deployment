@@ -1,0 +1,9 @@
+---
+- name: generate networking configuration files
+  template:
+    src: "./{{ item }}"
+    dest: "/ansible/files/network/"
+  loop:
+    - "asa-config.cfg"
+    - "SW_Conf.txt"
+...

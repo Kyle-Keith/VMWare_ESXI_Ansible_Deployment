@@ -1,0 +1,18 @@
+---
+- name: change FWD portgroups
+  community.vmware.vmware_guest_network:
+    hostname: '{{VCSA.IP}}' 
+    username: '{{VCSA.Username}}' 
+    password: '{{DMSS_Pass}}'
+    datacenter: '{{VCSA.datacenter_name}}'
+    validate_certs: no 
+    name: "{{vm_name}}"
+    networks:
+      - label: "{{adapter_label}}"
+        name: "{{portgroup}}"
+        state: present
+        connected: true
+        start_connected: true
+          
+
+          

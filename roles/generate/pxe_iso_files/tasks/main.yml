@@ -1,0 +1,48 @@
+---
+- name: Mount SO and copy configs to tftp dir
+  shell: | 
+    sudo umount /mnt/seconion
+    sudo mkdir -p /var/lib/tftpboot/centos
+    sudo mkdir -p /var/www/html/centos/*
+    sudo rm -rf /var/www/html/centos/*
+    sudo mkdir -p /mnt/seconion
+    sudo mount -o loop -t iso9660 "/ansible/files/isos/{{onionIso}}" /mnt/seconion
+  become: true
+
+- name: pause for 5 seconds
+  pause:
+    seconds: 5
+
+- name: Copy Security Onion ISO isolinux images
+  copy:
+    src: "/mnt/seconion/{{ item }}"
+    dest: /var/lib/tftpboot/
+    owner: tftp
+    group: tftp
+    mode: preserve
+  with_items:
+    - vmlinuz
+    - initrd.img
+
+- name: Extract Security Onion ISO contents
+  shell: | 
+    sudo cp -r /mnt/seconion/* /var/www/html/centos/
+  become: true
+
+- name: Mount SO and copy configs to tftp dir
+  shell: | 
+    sudo umount /mnt/seconion
+    sudo rm -rf /mnt/seconion
+  become: true
+
+- name: Mounting source directory from official production ESXi ISO . . . copying over build files . . . backing up defaults . . .
+  shell: |
+    umount /mnt/esxi
+    sudo mkdir -p /var/lib/tftpboot/ESXI_7U3
+    sudo rm -rf /var/lib/tftpboot/ESXI_7U3/*
+    mkdir /mnt/esxi
+    mount -o loop -t iso9660 /ansible/files/isos/{{ src_iso_file }} /mnt/esxi
+    cp -r /mnt/esxi/* /var/lib/tftpboot/ESXI_7U3/
+    umount /mnt/esxi
+    rm -rf /mnt/esxi
+  become: true

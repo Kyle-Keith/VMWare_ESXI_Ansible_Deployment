@@ -1,0 +1,37 @@
+---
+# - name: include all vars
+#   include_vars: /ansible/group_vars/all.yml
+
+- name: Create list of all servers
+  set_fact:
+    server_dicts: "{{ server_dicts|default([]) + [lookup('vars', item.key)] }}"
+  loop: "{{ Cluster_Servers }}"
+
+- name: Create list of all sensors
+  set_fact:
+    sensor_dicts: "{{ sensor_dicts|default([]) + [lookup('vars', item.key)] }}"
+  loop: "{{ Sensor_Nodes }}"
+
+- name: combine list
+  set_fact: 
+    combined_list: "{{ server_dicts | union(sensor_dicts) }}"
+
+- name: Initialize macs dictionary
+  set_fact:
+    server_macs: {}
+
+- name: Include mac yaml for servers
+  include_tasks: mac.yml
+  loop: "{{ combined_list }}"
+
+- name: Append filtered macs to file
+  blockinfile:
+    path: "/ansible/group_vars/all.yml"
+    block: |
+      server_macs:
+      {% for key, value in server_macs.items() %}
+        {{ key }}: {{ value }}
+      {% endfor %}
+    insertbefore: "..."
+    marker: "# Discovered server macs"
+    state: present

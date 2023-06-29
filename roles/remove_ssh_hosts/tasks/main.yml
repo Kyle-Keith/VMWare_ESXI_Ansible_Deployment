@@ -1,0 +1,6 @@
+---
+- name: remove ssh known hosts
+  file:
+    path: "/home/cptadmin/.ssh"
+    state: absent
+  become: yes
