@@ -1,6 +1,0 @@
----
-ansible_user: root
-ansible_password: '{{ DMSS_Pass }}'
-ansible_python_interpreter: '/bin/python3'
-
-
