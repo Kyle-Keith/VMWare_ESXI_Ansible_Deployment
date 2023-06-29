@@ -1,6 +1,0 @@
----
-ansible_user: root
-ansible_password: 'DM55Password!@'
-ansible_python_interpreter: '/bin/python3'
-
-
