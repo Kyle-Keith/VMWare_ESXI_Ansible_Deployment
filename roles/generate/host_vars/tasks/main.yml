@@ -6,7 +6,7 @@
     dest: "/ansible/{{item.1}}"
     mode: 0755
   with_together:
-    - ["esxi","seconion","Splunk","PA",localhost]
-    - ["group_vars/","group_vars/","group_vars/","group_vars/","host_vars/"]
+    - [localhost]
+    - ["host_vars/"]
 
 ...
